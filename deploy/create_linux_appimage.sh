@@ -1,6 +1,7 @@
-#!/bin/bash -x
+#!/bin/bash
 
-#set +e
+# This is causing master builds to fail. I'll figure it out once I get Stable out.
+#set -Eeuxo pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 
 if [[ $# -eq 0 ]]; then
   echo 'create_linux_appimage.sh QGC_SRC_DIR QGC_RELEASE_DIR'
@@ -41,8 +42,6 @@ APPDIR=${TMPDIR}/$APP".AppDir"
 mkdir -p ${APPDIR}
 
 cd ${TMPDIR}
-wget -c --quiet http://ftp.us.debian.org/debian/pool/main/u/udev/udev_175-7.2_amd64.deb
-wget -c --quiet http://ftp.us.debian.org/debian/pool/main/s/speech-dispatcher/speech-dispatcher_0.8.8-1_amd64.deb
 wget -c --quiet http://ftp.us.debian.org/debian/pool/main/libs/libsdl2/libsdl2-2.0-0_2.0.2%2bdfsg1-6_amd64.deb
 
 cd ${APPDIR}
@@ -56,12 +55,6 @@ dpkg -x libdirectfb-1.2-9_1.2.10.0-5.1_amd64.deb libdirectfb
 cp -L libdirectfb/usr/lib/x86_64-linux-gnu/libdirectfb-1.2.so.9 ${APPDIR}/usr/lib/x86_64-linux-gnu/
 cp -L libdirectfb/usr/lib/x86_64-linux-gnu/libfusion-1.2.so.9 ${APPDIR}/usr/lib/x86_64-linux-gnu/
 cp -L libdirectfb/usr/lib/x86_64-linux-gnu/libdirect-1.2.so.9 ${APPDIR}/usr/lib/x86_64-linux-gnu/
-
-# copy libts-0.0-0
-wget -c --quiet http://ftp.us.debian.org/debian/pool/main/t/tslib/libts-0.0-0_1.0-11_amd64.deb
-mkdir libts
-dpkg -x libts-0.0-0_1.0-11_amd64.deb libts
-cp -L libts/usr/lib/x86_64-linux-gnu/libts-0.0.so.0 ${APPDIR}/usr/lib/x86_64-linux-gnu/
 
 # copy QGroundControl release into appimage
 rsync -av --exclude=*.cpp --exclude=*.h --exclude=*.o --exclude="CMake*" --exclude="*.cmake" ${QGC_RELEASE_DIR}/* ${APPDIR}/
@@ -89,10 +82,10 @@ echo ${QGC_CUSTOM_APP_NAME} Version: ${VERSION}
 
 # Go out of AppImage
 cd ${TMPDIR}
-wget -c --quiet "https://github.com/probonopd/AppImageKit/releases/download/5/AppImageAssistant" # (64-bit)
-chmod a+x ./AppImageAssistant
+wget -c --quiet "https://github.com/AppImage/AppImageKit/releases/download/12/appimagetool-x86_64.AppImage"
+chmod a+x ./appimagetool-x86_64.AppImage
 
-./AppImageAssistant ./$APP.AppDir/ ${TMPDIR}/$APP".AppImage"
+./appimagetool-x86_64.AppImage ./$APP.AppDir/ ${TMPDIR}/$APP".AppImage"
 
 cp ${TMPDIR}/$APP".AppImage" ${OUTPUT_DIR}/$APP".AppImage"
 

@@ -63,6 +63,26 @@ DECLARE_SETTINGGROUP(Video, "Video")
         videoSourceVarList.append(QVariant::fromValue(videoSource));
     }
     _nameToMetaDataMap[videoSourceName]->setEnumInfo(videoSourceList, videoSourceVarList);
+
+    const QVariantList removeForceVideoDecodeList{
+#ifdef Q_OS_LINUX
+        VideoDecoderOptions::ForceVideoDecoderDirectX3D,
+        VideoDecoderOptions::ForceVideoDecoderVideoToolbox,
+#endif
+#ifdef Q_OS_WIN
+        VideoDecoderOptions::ForceVideoDecoderVAAPI,
+        VideoDecoderOptions::ForceVideoDecoderVideoToolbox,
+#endif
+#ifdef Q_OS_MAC
+        VideoDecoderOptions::ForceVideoDecoderDirectX3D,
+        VideoDecoderOptions::ForceVideoDecoderVAAPI,
+#endif
+    };
+
+    for(const auto& value : removeForceVideoDecodeList) {
+        _nameToMetaDataMap[forceVideoDecoderName]->removeEnumInfo(value);
+    }
+
     // Set default value for videoSource
     _setDefaults();
 }
@@ -103,6 +123,28 @@ DECLARE_SETTINGSFACT_NO_FUNC(VideoSettings, videoSource)
         connect(_videoSourceFact, &Fact::valueChanged, this, &VideoSettings::_configChanged);
     }
     return _videoSourceFact;
+}
+
+DECLARE_SETTINGSFACT_NO_FUNC(VideoSettings, forceVideoDecoder)
+{
+    if (!_forceVideoDecoderFact) {
+        _forceVideoDecoderFact = _createSettingsFact(forceVideoDecoderName);
+
+        _forceVideoDecoderFact->setVisible(
+#ifdef Q_OS_IOS
+            false
+#else
+#ifdef Q_OS_ANDROID
+            false
+#else
+            true
+#endif
+#endif
+        );
+
+        connect(_forceVideoDecoderFact, &Fact::valueChanged, this, &VideoSettings::_configChanged);
+    }
+    return _forceVideoDecoderFact;
 }
 
 DECLARE_SETTINGSFACT_NO_FUNC(VideoSettings, udpPort)

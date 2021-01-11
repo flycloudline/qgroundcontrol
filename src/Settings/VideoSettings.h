@@ -35,6 +35,17 @@ public:
     DEFINE_SETTINGFACT(streamEnabled)
     DEFINE_SETTINGFACT(disableWhenDisarmed)
     DEFINE_SETTINGFACT(lowLatencyMode)
+    DEFINE_SETTINGFACT(forceVideoDecoder)
+
+    enum VideoDecoderOptions {
+        ForceVideoDecoderDefault = 0,
+        ForceVideoDecoderSoftware,
+        ForceVideoDecoderNVIDIA,
+        ForceVideoDecoderVAAPI,
+        ForceVideoDecoderDirectX3D,
+        ForceVideoDecoderVideoToolbox,
+    };
+    Q_ENUM(VideoDecoderOptions)
 
     Q_PROPERTY(bool     streamConfigured        READ streamConfigured       NOTIFY streamConfiguredChanged)
     Q_PROPERTY(QString  rtspVideoSource         READ rtspVideoSource        CONSTANT)

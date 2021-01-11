@@ -1206,7 +1206,7 @@ Set -1 to disable the check</short_desc>
     </parameter>
     <parameter name="COM_HLDL_REG_T" default="0" type="INT32">
       <short_desc>High Latency Datalink regain time threshold</short_desc>
-      <long_desc>After a data link loss: after this this amount of seconds with a healthy datalink the 'datalink loss' flag is set back to false</long_desc>
+      <long_desc>After a data link loss: after this number of seconds with a healthy datalink the 'datalink loss' flag is set back to false</long_desc>
       <min>0</min>
       <max>60</max>
       <unit>s</unit>
@@ -1219,6 +1219,10 @@ Set -1 to disable the check</short_desc>
       <unit>m</unit>
       <decimal>2</decimal>
       <increment>0.5</increment>
+    </parameter>
+    <parameter name="COM_HOME_IN_AIR" default="0" type="INT32">
+      <short_desc>Allows setting the home position after takeoff</short_desc>
+      <long_desc>If set to true, the autopilot is allowed to set its home position after takeoff The true home position is back-computed if a local position is estimate if available. If no local position is available, home is set to the current position.</long_desc>
     </parameter>
     <parameter name="COM_HOME_V_T" default="10.0" type="FLOAT">
       <short_desc>Home set vertical threshold</short_desc>
@@ -1353,6 +1357,7 @@ See COM_OBL_ACT and COM_OBL_RC_ACT to configure action</short_desc>
       <long_desc>The default value of 1000 requires the stick to be held in the arm or disarm position for 1 second.</long_desc>
       <min>100</min>
       <max>1500</max>
+      <unit>ms</unit>
     </parameter>
     <parameter name="COM_RC_IN_MODE" default="0" type="INT32">
       <short_desc>RC control input mode</short_desc>
@@ -1376,12 +1381,12 @@ See COM_OBL_ACT and COM_OBL_RC_ACT to configure action</short_desc>
     </parameter>
     <parameter name="COM_RC_OVERRIDE" default="1" type="INT32">
       <short_desc>Enable RC stick override of auto and/or offboard modes</short_desc>
-      <long_desc>When RC stick override is enabled, moving the RC sticks according to COM_RC_STICK_OV immediately gives control back to the pilot (switches to manual position mode): bit 0: Enable for auto modes (except for in critical battery reaction), bit 1: Enable for offboard mode. Only has an effect on multicopters, and VTOLS in multicopter mode.</long_desc>
+      <long_desc>When RC stick override is enabled, moving the RC sticks more than COM_RC_STICK_OV from their center position immediately gives control back to the pilot by switching to Position mode. Note: Only has an effect on multicopters, and VTOLs in multicopter mode.</long_desc>
       <min>0</min>
       <max>3</max>
       <bitmask>
-        <bit index="0">Enable override in auto modes</bit>
-        <bit index="1">Enable override in offboard mode</bit>
+        <bit index="0">Enable override during auto modes (except for in critical battery reaction)</bit>
+        <bit index="1">Enable override during offboard mode</bit>
       </bitmask>
     </parameter>
     <parameter name="COM_RC_STICK_OV" default="30.0" type="FLOAT">
@@ -1440,6 +1445,7 @@ See COM_OBL_ACT and COM_OBL_RC_ACT to configure action</short_desc>
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
     <parameter name="MOT_POLE_COUNT" default="14" type="INT32">
@@ -1881,51 +1887,6 @@ If no airspeed measurements are avalable, the EKF-GSF AHRS calculation will assu
       <short_desc>Z position of IMU in body frame (down axis with origin relative to vehicle centre of gravity)</short_desc>
       <unit>m</unit>
       <decimal>3</decimal>
-    </parameter>
-    <parameter name="EKF2_MAGBIAS_ID" default="0" type="INT32" category="System">
-      <short_desc>ID of Magnetometer the learned bias is for</short_desc>
-      <reboot_required>true</reboot_required>
-    </parameter>
-    <parameter name="EKF2_MAGBIAS_X" default="0.0" type="FLOAT" volatile="true" category="System">
-      <short_desc>Learned value of magnetometer X axis bias.
-This is the amount of X-axis magnetometer bias learned by the EKF and saved from the last flight. It must be set to zero if the ground based magnetometer calibration is repeated</short_desc>
-      <min>-0.5</min>
-      <max>0.5</max>
-      <unit>gauss</unit>
-      <decimal>3</decimal>
-      <reboot_required>true</reboot_required>
-    </parameter>
-    <parameter name="EKF2_MAGBIAS_Y" default="0.0" type="FLOAT" volatile="true" category="System">
-      <short_desc>Learned value of magnetometer Y axis bias.
-This is the amount of Y-axis magnetometer bias learned by the EKF and saved from the last flight. It must be set to zero if the ground based magnetometer calibration is repeated</short_desc>
-      <min>-0.5</min>
-      <max>0.5</max>
-      <unit>gauss</unit>
-      <decimal>3</decimal>
-      <reboot_required>true</reboot_required>
-    </parameter>
-    <parameter name="EKF2_MAGBIAS_Z" default="0.0" type="FLOAT" volatile="true" category="System">
-      <short_desc>Learned value of magnetometer Z axis bias.
-This is the amount of Z-axis magnetometer bias learned by the EKF and saved from the last flight. It must be set to zero if the ground based magnetometer calibration is repeated</short_desc>
-      <min>-0.5</min>
-      <max>0.5</max>
-      <unit>gauss</unit>
-      <decimal>3</decimal>
-      <reboot_required>true</reboot_required>
-    </parameter>
-    <parameter name="EKF2_MAGB_K" default="0.2" type="FLOAT">
-      <short_desc>Maximum fraction of learned mag bias saved at each disarm.
-Smaller values make the saved mag bias learn slower from flight to flight. Larger values make it learn faster. Must be &gt; 0.0 and &lt;= 1.0</short_desc>
-      <min>0.0</min>
-      <max>1.0</max>
-      <decimal>2</decimal>
-    </parameter>
-    <parameter name="EKF2_MAGB_VREF" default="2.5E-7" type="FLOAT">
-      <short_desc>State variance assumed for magnetometer bias storage.
-This is a reference variance used to calculate the fraction of learned magnetometer bias that will be used to update the stored value. Smaller values will make the stored bias data adjust more slowly from flight to flight. Larger values will make it adjust faster</short_desc>
-      <unit>gauss^2</unit>
-      <decimal>8</decimal>
-      <reboot_required>true</reboot_required>
     </parameter>
     <parameter name="EKF2_MAG_ACCLIM" default="0.5" type="FLOAT">
       <short_desc>Horizontal acceleration threshold used by automatic selection of magnetometer fusion method.
@@ -3288,6 +3249,7 @@ but also ignore less noise</short_desc>
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
     <parameter name="GPS_1_PROTOCOL" default="1" type="INT32">
@@ -3319,6 +3281,7 @@ but also ignore less noise</short_desc>
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
     <parameter name="GPS_2_PROTOCOL" default="1" type="INT32">
@@ -3435,12 +3398,12 @@ but also ignore less noise</short_desc>
     </parameter>
     <parameter name="GF_ALTMODE" default="0" type="INT32">
       <short_desc>Geofence altitude mode</short_desc>
-      <long_desc>Select which altitude reference should be used 0 = WGS84, 1 = AMSL</long_desc>
+      <long_desc>Select which altitude (AMSL) source should be used for geofence calculations.</long_desc>
       <min>0</min>
       <max>1</max>
       <values>
-        <value code="0">WGS84</value>
-        <value code="1">AMSL</value>
+        <value code="0">Autopilot estimator global position altitude (GPS)</value>
+        <value code="1">Raw barometer altitude (assuming standard atmospheric pressure)</value>
       </values>
     </parameter>
     <parameter name="GF_COUNT" default="-1" type="INT32">
@@ -3519,6 +3482,7 @@ but also ignore less noise</short_desc>
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
     <parameter name="ISBD_READ_INT" default="0" type="INT32">
@@ -3542,7 +3506,7 @@ Value 0 turns the functionality off</short_desc>
     </parameter>
   </group>
   <group name="Land Detector">
-    <parameter name="LNDFW_AIRSPD_MAX" default="8.00" type="FLOAT">
+    <parameter name="LNDFW_AIRSPD_MAX" default="6.00" type="FLOAT">
       <short_desc>Airspeed max</short_desc>
       <long_desc>Maximum airspeed allowed in the landed state (m/s)</long_desc>
       <min>4</min>
@@ -3967,6 +3931,7 @@ Used to calculate increased terrain random walk nosie due to movement</short_des
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
     <parameter name="MAV_0_FORWARD" default="1" type="INT32">
@@ -4016,6 +3981,7 @@ Used to calculate increased terrain random walk nosie due to movement</short_des
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
     <parameter name="MAV_1_FORWARD" default="0" type="INT32">
@@ -4065,6 +4031,7 @@ Used to calculate increased terrain random walk nosie due to movement</short_des
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
     <parameter name="MAV_2_FORWARD" default="0" type="INT32">
@@ -6096,6 +6063,7 @@ default 1.5 turns per second</short_desc>
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
     <parameter name="RTPS_MAV_CONFIG" default="0" type="INT32">
@@ -6113,6 +6081,7 @@ default 1.5 turns per second</short_desc>
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
   </group>
@@ -7719,7 +7688,7 @@ default 1.5 turns per second</short_desc>
     </parameter>
   </group>
   <group name="Return Mode">
-    <parameter name="RTL_CONE_ANG" default="0" type="INT32">
+    <parameter name="RTL_CONE_ANG" default="45" type="INT32">
       <short_desc>Half-angle of the return mode altitude cone</short_desc>
       <long_desc>Defines the half-angle of a cone centered around the destination position that affects the altitude at which the vehicle returns.</long_desc>
       <min>0</min>
@@ -7752,9 +7721,9 @@ default 1.5 turns per second</short_desc>
       <decimal>1</decimal>
       <increment>0.5</increment>
     </parameter>
-    <parameter name="RTL_MIN_DIST" default="5.0" type="FLOAT">
-      <short_desc>Maximum horizontal distance from return destination, below which RTL_DESCEND_ALT is used as return altitude</short_desc>
-      <long_desc>If the vehicle is less than this horizontal distance from the return destination when return mode is activated it will ascend to RTL_DESCEND_ALT for the return journey (rather than the altitude set by RTL_RETURN_ALT and RTL_CONE_ANG).</long_desc>
+    <parameter name="RTL_MIN_DIST" default="10.0" type="FLOAT">
+      <short_desc>Horizontal radius from return point within which special rules for return mode apply</short_desc>
+      <long_desc>The return altitude will be calculated based on RTL_CONE_ANG parameter. The yaw setpoint will switch to the one defined by corresponding waypoint.</long_desc>
       <min>0.5</min>
       <max>100</max>
       <unit>m</unit>
@@ -7808,6 +7777,7 @@ default 1.5 turns per second</short_desc>
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
   </group>
@@ -8204,7 +8174,7 @@ Particularly useful for testing different low-battery behaviour</short_desc>
       <short_desc>Rotation of accelerometer 0 relative to airframe</short_desc>
       <long_desc>An internal sensor will force a value of -1, so a GCS should only attempt to configure the rotation if the value is greater than or equal to zero.</long_desc>
       <min>-1</min>
-      <max>41</max>
+      <max>40</max>
       <reboot_required>true</reboot_required>
       <values>
         <value code="-1">Internal</value>
@@ -8249,7 +8219,6 @@ Particularly useful for testing different low-battery behaviour</short_desc>
         <value code="38">Roll 90°, Pitch 68°, Yaw 293°</value>
         <value code="39">Pitch 315°</value>
         <value code="40">Roll 90°, Pitch 315°</value>
-        <value code="41">Roll 270°, Yaw 180°</value>
       </values>
     </parameter>
     <parameter name="CAL_ACC0_XOFF" default="0.0" type="FLOAT" category="System">
@@ -8289,7 +8258,7 @@ Particularly useful for testing different low-battery behaviour</short_desc>
       <short_desc>Rotation of accelerometer 1 relative to airframe</short_desc>
       <long_desc>An internal sensor will force a value of -1, so a GCS should only attempt to configure the rotation if the value is greater than or equal to zero.</long_desc>
       <min>-1</min>
-      <max>41</max>
+      <max>40</max>
       <reboot_required>true</reboot_required>
       <values>
         <value code="-1">Internal</value>
@@ -8334,7 +8303,6 @@ Particularly useful for testing different low-battery behaviour</short_desc>
         <value code="38">Roll 90°, Pitch 68°, Yaw 293°</value>
         <value code="39">Pitch 315°</value>
         <value code="40">Roll 90°, Pitch 315°</value>
-        <value code="41">Roll 270°, Yaw 180°</value>
       </values>
     </parameter>
     <parameter name="CAL_ACC1_XOFF" default="0.0" type="FLOAT" category="System">
@@ -8374,7 +8342,7 @@ Particularly useful for testing different low-battery behaviour</short_desc>
       <short_desc>Rotation of accelerometer 2 relative to airframe</short_desc>
       <long_desc>An internal sensor will force a value of -1, so a GCS should only attempt to configure the rotation if the value is greater than or equal to zero.</long_desc>
       <min>-1</min>
-      <max>41</max>
+      <max>40</max>
       <reboot_required>true</reboot_required>
       <values>
         <value code="-1">Internal</value>
@@ -8419,7 +8387,6 @@ Particularly useful for testing different low-battery behaviour</short_desc>
         <value code="38">Roll 90°, Pitch 68°, Yaw 293°</value>
         <value code="39">Pitch 315°</value>
         <value code="40">Roll 90°, Pitch 315°</value>
-        <value code="41">Roll 270°, Yaw 180°</value>
       </values>
     </parameter>
     <parameter name="CAL_ACC2_XOFF" default="0.0" type="FLOAT" category="System">
@@ -8459,7 +8426,7 @@ Particularly useful for testing different low-battery behaviour</short_desc>
       <short_desc>Rotation of accelerometer 3 relative to airframe</short_desc>
       <long_desc>An internal sensor will force a value of -1, so a GCS should only attempt to configure the rotation if the value is greater than or equal to zero.</long_desc>
       <min>-1</min>
-      <max>41</max>
+      <max>40</max>
       <reboot_required>true</reboot_required>
       <values>
         <value code="-1">Internal</value>
@@ -8504,7 +8471,6 @@ Particularly useful for testing different low-battery behaviour</short_desc>
         <value code="38">Roll 90°, Pitch 68°, Yaw 293°</value>
         <value code="39">Pitch 315°</value>
         <value code="40">Roll 90°, Pitch 315°</value>
-        <value code="41">Roll 270°, Yaw 180°</value>
       </values>
     </parameter>
     <parameter name="CAL_ACC3_XOFF" default="0.0" type="FLOAT" category="System">
@@ -8544,7 +8510,7 @@ Particularly useful for testing different low-battery behaviour</short_desc>
       <short_desc>Rotation of gyro 0 relative to airframe</short_desc>
       <long_desc>An internal sensor will force a value of -1, so a GCS should only attempt to configure the rotation if the value is greater than or equal to zero.</long_desc>
       <min>-1</min>
-      <max>41</max>
+      <max>40</max>
       <reboot_required>true</reboot_required>
       <values>
         <value code="-1">Internal</value>
@@ -8589,7 +8555,6 @@ Particularly useful for testing different low-battery behaviour</short_desc>
         <value code="38">Roll 90°, Pitch 68°, Yaw 293°</value>
         <value code="39">Pitch 315°</value>
         <value code="40">Roll 90°, Pitch 315°</value>
-        <value code="41">Roll 270°, Yaw 180°</value>
       </values>
     </parameter>
     <parameter name="CAL_GYRO0_XOFF" default="0.0" type="FLOAT" category="System">
@@ -8620,7 +8585,7 @@ Particularly useful for testing different low-battery behaviour</short_desc>
       <short_desc>Rotation of gyro 1 relative to airframe</short_desc>
       <long_desc>An internal sensor will force a value of -1, so a GCS should only attempt to configure the rotation if the value is greater than or equal to zero.</long_desc>
       <min>-1</min>
-      <max>41</max>
+      <max>40</max>
       <reboot_required>true</reboot_required>
       <values>
         <value code="-1">Internal</value>
@@ -8665,7 +8630,6 @@ Particularly useful for testing different low-battery behaviour</short_desc>
         <value code="38">Roll 90°, Pitch 68°, Yaw 293°</value>
         <value code="39">Pitch 315°</value>
         <value code="40">Roll 90°, Pitch 315°</value>
-        <value code="41">Roll 270°, Yaw 180°</value>
       </values>
     </parameter>
     <parameter name="CAL_GYRO1_XOFF" default="0.0" type="FLOAT" category="System">
@@ -8696,7 +8660,7 @@ Particularly useful for testing different low-battery behaviour</short_desc>
       <short_desc>Rotation of gyro 2 relative to airframe</short_desc>
       <long_desc>An internal sensor will force a value of -1, so a GCS should only attempt to configure the rotation if the value is greater than or equal to zero.</long_desc>
       <min>-1</min>
-      <max>41</max>
+      <max>40</max>
       <reboot_required>true</reboot_required>
       <values>
         <value code="-1">Internal</value>
@@ -8741,7 +8705,6 @@ Particularly useful for testing different low-battery behaviour</short_desc>
         <value code="38">Roll 90°, Pitch 68°, Yaw 293°</value>
         <value code="39">Pitch 315°</value>
         <value code="40">Roll 90°, Pitch 315°</value>
-        <value code="41">Roll 270°, Yaw 180°</value>
       </values>
     </parameter>
     <parameter name="CAL_GYRO2_XOFF" default="0.0" type="FLOAT" category="System">
@@ -8772,7 +8735,7 @@ Particularly useful for testing different low-battery behaviour</short_desc>
       <short_desc>Rotation of gyro 3 relative to airframe</short_desc>
       <long_desc>An internal sensor will force a value of -1, so a GCS should only attempt to configure the rotation if the value is greater than or equal to zero.</long_desc>
       <min>-1</min>
-      <max>41</max>
+      <max>40</max>
       <reboot_required>true</reboot_required>
       <values>
         <value code="-1">Internal</value>
@@ -8817,7 +8780,6 @@ Particularly useful for testing different low-battery behaviour</short_desc>
         <value code="38">Roll 90°, Pitch 68°, Yaw 293°</value>
         <value code="39">Pitch 315°</value>
         <value code="40">Roll 90°, Pitch 315°</value>
-        <value code="41">Roll 270°, Yaw 180°</value>
       </values>
     </parameter>
     <parameter name="CAL_GYRO3_XOFF" default="0.0" type="FLOAT" category="System">
@@ -8848,7 +8810,7 @@ Particularly useful for testing different low-battery behaviour</short_desc>
       <short_desc>Rotation of magnetometer 0 relative to airframe</short_desc>
       <long_desc>An internal sensor will force a value of -1, so a GCS should only attempt to configure the rotation if the value is greater than or equal to zero.</long_desc>
       <min>-1</min>
-      <max>41</max>
+      <max>40</max>
       <reboot_required>true</reboot_required>
       <values>
         <value code="-1">Internal</value>
@@ -8893,7 +8855,6 @@ Particularly useful for testing different low-battery behaviour</short_desc>
         <value code="38">Roll 90°, Pitch 68°, Yaw 293°</value>
         <value code="39">Pitch 315°</value>
         <value code="40">Roll 90°, Pitch 315°</value>
-        <value code="41">Roll 270°, Yaw 180°</value>
       </values>
     </parameter>
     <parameter name="CAL_MAG0_XCOMP" default="0.0" type="FLOAT" category="System">
@@ -8963,7 +8924,7 @@ for current-based compensation [G/kA]</short_desc>
       <short_desc>Rotation of magnetometer 1 relative to airframe</short_desc>
       <long_desc>An internal sensor will force a value of -1, so a GCS should only attempt to configure the rotation if the value is greater than or equal to zero.</long_desc>
       <min>-1</min>
-      <max>41</max>
+      <max>40</max>
       <reboot_required>true</reboot_required>
       <values>
         <value code="-1">Internal</value>
@@ -9008,7 +8969,6 @@ for current-based compensation [G/kA]</short_desc>
         <value code="38">Roll 90°, Pitch 68°, Yaw 293°</value>
         <value code="39">Pitch 315°</value>
         <value code="40">Roll 90°, Pitch 315°</value>
-        <value code="41">Roll 270°, Yaw 180°</value>
       </values>
     </parameter>
     <parameter name="CAL_MAG1_XCOMP" default="0.0" type="FLOAT" category="System">
@@ -9078,7 +9038,7 @@ for current-based compensation [G/kA]</short_desc>
       <short_desc>Rotation of magnetometer 2 relative to airframe</short_desc>
       <long_desc>An internal sensor will force a value of -1, so a GCS should only attempt to configure the rotation if the value is greater than or equal to zero.</long_desc>
       <min>-1</min>
-      <max>41</max>
+      <max>40</max>
       <reboot_required>true</reboot_required>
       <values>
         <value code="-1">Internal</value>
@@ -9123,7 +9083,6 @@ for current-based compensation [G/kA]</short_desc>
         <value code="38">Roll 90°, Pitch 68°, Yaw 293°</value>
         <value code="39">Pitch 315°</value>
         <value code="40">Roll 90°, Pitch 315°</value>
-        <value code="41">Roll 270°, Yaw 180°</value>
       </values>
     </parameter>
     <parameter name="CAL_MAG2_XCOMP" default="0.0" type="FLOAT" category="System">
@@ -9193,7 +9152,7 @@ for current-based compensation [G/kA]</short_desc>
       <short_desc>Rotation of magnetometer 3 relative to airframe</short_desc>
       <long_desc>An internal sensor will force a value of -1, so a GCS should only attempt to configure the rotation if the value is greater than or equal to zero.</long_desc>
       <min>-1</min>
-      <max>41</max>
+      <max>40</max>
       <reboot_required>true</reboot_required>
       <values>
         <value code="-1">Internal</value>
@@ -9238,7 +9197,6 @@ for current-based compensation [G/kA]</short_desc>
         <value code="38">Roll 90°, Pitch 68°, Yaw 293°</value>
         <value code="39">Pitch 315°</value>
         <value code="40">Roll 90°, Pitch 315°</value>
-        <value code="41">Roll 270°, Yaw 180°</value>
       </values>
     </parameter>
     <parameter name="CAL_MAG3_XCOMP" default="0.0" type="FLOAT" category="System">
@@ -9540,7 +9498,7 @@ How often the sensor is readout</short_desc>
       <short_desc>Board rotation</short_desc>
       <long_desc>This parameter defines the rotation of the FMU board relative to the platform.</long_desc>
       <min>-1</min>
-      <max>41</max>
+      <max>40</max>
       <reboot_required>true</reboot_required>
       <values>
         <value code="0">No rotation</value>
@@ -9584,7 +9542,6 @@ How often the sensor is readout</short_desc>
         <value code="38">Roll 90°, Pitch 68°, Yaw 293°</value>
         <value code="39">Pitch 315°</value>
         <value code="40">Roll 90°, Pitch 315°</value>
-        <value code="41">Roll 270°, Yaw 180°</value>
       </values>
     </parameter>
     <parameter name="SENS_BOARD_X_OFF" default="0.0" type="FLOAT">
@@ -9617,6 +9574,7 @@ How often the sensor is readout</short_desc>
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
     <parameter name="SENS_CM8JL65_R_0" default="25" type="INT32">
@@ -9729,6 +9687,10 @@ How often the sensor is readout</short_desc>
         <value code="5">TREvo3m</value>
       </values>
     </parameter>
+    <parameter name="SENS_EN_VL53L1X" default="0" type="INT32">
+      <short_desc>VL53L1X Distance Sensor</short_desc>
+      <reboot_required>true</reboot_required>
+    </parameter>
     <parameter name="SENS_EXT_I2C_PRB" default="1" type="INT32" category="System">
       <short_desc>External I2C probe</short_desc>
       <long_desc>Probe for optional external I2C devices.</long_desc>
@@ -9811,6 +9773,7 @@ How often the sensor is readout</short_desc>
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
     <parameter name="SENS_MAG_MODE" default="1" type="INT32" category="System">
@@ -10252,6 +10215,7 @@ How often the sensor is readout</short_desc>
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
     <parameter name="SENS_TEMP_ID" default="0" type="INT32" category="System">
@@ -10272,6 +10236,7 @@ How often the sensor is readout</short_desc>
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
     <parameter name="SENS_TFMINI_CFG" default="0" type="INT32">
@@ -10289,6 +10254,7 @@ How often the sensor is readout</short_desc>
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
     <parameter name="SENS_ULAND_CFG" default="0" type="INT32">
@@ -10306,6 +10272,7 @@ How often the sensor is readout</short_desc>
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
     <parameter name="VOXLPM_SHUNT_BAT" default="0.00063" type="FLOAT">
@@ -10341,6 +10308,7 @@ How often the sensor is readout</short_desc>
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
     <parameter name="SER_GPS1_BAUD" default="0" type="INT32">
@@ -10640,6 +10608,39 @@ How often the sensor is readout</short_desc>
         <value code="3000000">3000000 8N1</value>
       </values>
     </parameter>
+    <parameter name="SER_WIFI_BAUD" default="1" type="INT32">
+      <short_desc>Baudrate for the Wifi Port Serial Port</short_desc>
+      <long_desc>Configure the Baudrate for the Wifi Port Serial Port. Note: certain drivers such as the GPS can determine the Baudrate automatically.</long_desc>
+      <reboot_required>true</reboot_required>
+      <values>
+        <value code="0">Auto</value>
+        <value code="50">50 8N1</value>
+        <value code="75">75 8N1</value>
+        <value code="110">110 8N1</value>
+        <value code="134">134 8N1</value>
+        <value code="150">150 8N1</value>
+        <value code="200">200 8N1</value>
+        <value code="300">300 8N1</value>
+        <value code="600">600 8N1</value>
+        <value code="1200">1200 8N1</value>
+        <value code="1800">1800 8N1</value>
+        <value code="2400">2400 8N1</value>
+        <value code="4800">4800 8N1</value>
+        <value code="9600">9600 8N1</value>
+        <value code="19200">19200 8N1</value>
+        <value code="38400">38400 8N1</value>
+        <value code="57600">57600 8N1</value>
+        <value code="115200">115200 8N1</value>
+        <value code="230400">230400 8N1</value>
+        <value code="460800">460800 8N1</value>
+        <value code="500000">500000 8N1</value>
+        <value code="921600">921600 8N1</value>
+        <value code="1000000">1000000 8N1</value>
+        <value code="1500000">1500000 8N1</value>
+        <value code="2000000">2000000 8N1</value>
+        <value code="3000000">3000000 8N1</value>
+      </values>
+    </parameter>
   </group>
   <group name="Simulation In Hardware">
     <parameter name="SIH_IXX" default="0.025" type="FLOAT">
@@ -10830,19 +10831,19 @@ How often the sensor is readout</short_desc>
     </parameter>
     <parameter name="SYS_CAL_ACCEL" default="0" type="INT32">
       <short_desc>Enable auto start of accelerometer thermal calibration at the next power up</short_desc>
-      <long_desc>0 : Set to 0 to do nothing 1 : Set to 1 to start a calibration at next boot This parameter is reset to zero when the the temperature calibration starts. default (0, no calibration)</long_desc>
+      <long_desc>0 : Set to 0 to do nothing 1 : Set to 1 to start a calibration at next boot This parameter is reset to zero when the temperature calibration starts. default (0, no calibration)</long_desc>
       <min>0</min>
       <max>1</max>
     </parameter>
     <parameter name="SYS_CAL_BARO" default="0" type="INT32">
       <short_desc>Enable auto start of barometer thermal calibration at the next power up</short_desc>
-      <long_desc>0 : Set to 0 to do nothing 1 : Set to 1 to start a calibration at next boot This parameter is reset to zero when the the temperature calibration starts. default (0, no calibration)</long_desc>
+      <long_desc>0 : Set to 0 to do nothing 1 : Set to 1 to start a calibration at next boot This parameter is reset to zero when the temperature calibration starts. default (0, no calibration)</long_desc>
       <min>0</min>
       <max>1</max>
     </parameter>
     <parameter name="SYS_CAL_GYRO" default="0" type="INT32">
       <short_desc>Enable auto start of rate gyro thermal calibration at the next power up</short_desc>
-      <long_desc>0 : Set to 0 to do nothing 1 : Set to 1 to start a calibration at next boot This parameter is reset to zero when the the temperature calibration starts. default (0, no calibration)</long_desc>
+      <long_desc>0 : Set to 0 to do nothing 1 : Set to 1 to start a calibration at next boot This parameter is reset to zero when the temperature calibration starts. default (0, no calibration)</long_desc>
       <min>0</min>
       <max>1</max>
     </parameter>
@@ -10872,7 +10873,7 @@ How often the sensor is readout</short_desc>
     </parameter>
     <parameter name="SYS_HAS_BARO" default="1" type="INT32">
       <short_desc>Control if the vehicle has a barometer</short_desc>
-      <long_desc>Disable this if the board has no barometer, such as some of the the Omnibus F4 SD variants. If disabled, the preflight checks will not check for the presence of a barometer.</long_desc>
+      <long_desc>Disable this if the board has no barometer, such as some of the Omnibus F4 SD variants. If disabled, the preflight checks will not check for the presence of a barometer.</long_desc>
       <reboot_required>true</reboot_required>
     </parameter>
     <parameter name="SYS_HAS_MAG" default="1" type="INT32">
@@ -10949,6 +10950,7 @@ How often the sensor is readout</short_desc>
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
     <parameter name="TEL_HOTT_CONFIG" default="0" type="INT32">
@@ -10966,6 +10968,7 @@ How often the sensor is readout</short_desc>
         <value code="202">GPS 2</value>
         <value code="203">GPS 3</value>
         <value code="300">Radio Controller</value>
+        <value code="301">Wifi Port</value>
       </values>
     </parameter>
   </group>
@@ -12007,6 +12010,13 @@ to fixed wing mode. Zero or negative values will produce an instant throttle ris
     </parameter>
     <parameter name="RV_YAW_P" default="0.1" type="FLOAT">
       <short_desc>RV_YAW_P</short_desc>
+    </parameter>
+    <parameter name="UUV_SKIP_CTRL" default="0" type="INT32">
+      <short_desc>Skip the controller</short_desc>
+      <values>
+        <value code="0">use the module's controller</value>
+        <value code="1">skip the controller and feedthrough the setpoints</value>
+      </values>
     </parameter>
   </group>
 </parameters>

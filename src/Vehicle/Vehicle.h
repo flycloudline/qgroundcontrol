@@ -373,7 +373,7 @@ public:
     ///     @param motor Motor number, 1-based
     ///     @param percent 0-no power, 100-full power
     ///     @param timeoutSec Disabled motor after this amount of time
-    Q_INVOKABLE void motorTest(int motor, int percent, int timeoutSecs);
+    Q_INVOKABLE void motorTest(int motor, int percent, int timeoutSecs, bool showError);
 
     Q_INVOKABLE void setPIDTuningTelemetryMode(bool pidTuning);
 
@@ -939,7 +939,7 @@ private:
     void _setCapabilities               (uint64_t capabilityBits);
     void _updateArmed                   (bool armed);
     bool _apmArmingNotRequired          ();
-    void _pidTuningAdjustRates          (bool setRatesForTuning);
+    void _pidTuningAdjustRates          ();
     void _initializeCsv                 ();
     void _writeCsvLine                  ();
     void _flightTimerStart              ();
@@ -1008,7 +1008,7 @@ private:
     unsigned        _mavlinkProtocolRequestMaxProtoVersion  = 0;
     unsigned        _maxProtoVersion                        = 0;
     bool            _capabilityBitsKnown                    = false;
-    uint64_t        _capabilityBits;
+    uint64_t        _capabilityBits                         = 0;
     bool            _receivingAttitudeQuaternion = false;
     CheckList       _checkListState                         = CheckListNotSetup;
     bool            _readyToFlyAvailable                    = false;
@@ -1107,8 +1107,9 @@ private:
     // PID Tuning telemetry mode
     bool            _pidTuningTelemetryMode = false;
     bool            _pidTuningWaitingForRates = false;
-    QList<int>      _pidTuningMessages;
+    int             _pidTuningNextAdjustIndex = -1;
     QMap<int, int>  _pidTuningMessageRatesUsecs;
+    static const QList<int> _pidTuningMessages;
 
     // Chunked status text support
     typedef struct {
@@ -1251,6 +1252,7 @@ private:
     static const char* _vibrationFactGroupName;
     static const char* _temperatureFactGroupName;
     static const char* _clockFactGroupName;
+    static const char* _setpointFactGroupName;
     static const char* _distanceSensorFactGroupName;
     static const char* _escStatusFactGroupName;
     static const char* _estimatorStatusFactGroupName;
